@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inject</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: #f0f0f0;
+            position: relative;
+            overflow: hidden;
+        }
+        .draggable-menu {
+            width: 200px;
+            height: 300px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            backdrop-filter: blur(10px);
+            color: white;
+            z-index: 10;
+            transition: opacity 0.3s ease, transform 0.3s ease, pointer-events 0.3s ease;
+            opacity: 1;
+        }
+        .menu-header {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            text-align: center;
+            cursor: move;
+            font-size: 16px;
+            border-radius: 8px 8px 0 0;
+            border-bottom: 2px solid #007BFF;
+        }
+        .menu-content {
+            padding: 0px;
+            overflow-y: auto;
+            max-height: 250px;
+        }
+        .menu-content ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .menu-content ul li {
+            padding: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+        }
+        .menu-content ul li:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .background-iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 1;
+        }
+        .toggle-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background-color: #007BFF;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 11;
+        }
+    </style>
+</head>
+<body>
+
+<div class="draggable-menu" id="draggableMenuCombat">
+    <div class="menu-header" id="draggableHeaderCombat">Combat</div>
+    <div class="menu-content">
+        <ul>
+            <li>AimBot</li>
+            <li>AutoArmor</li>
+            <li>AutoBow</li>
+            <li>AutoClicker</li>
+            <li>AutoLeave</li>
+            <li>AutoPot</li>
+            <li>AutoSoup</li>
+            <li>AutoSword</li>
+            <li>BowAimBot</li>
+            <li>Criticals</li>
+            <li>FastBow</li>
+            <li>HitBox</li>
+            <li>Ignite</li>
+            <li>KillAura</li>
+            <li>NoFriends</li>
+            <li>Trigger</li>
+            <li>Velocity</li>
+        </ul>
+    </div>
+</div>
+
+<div class="draggable-menu" id="draggableMenuMovement">
+    <div class="menu-header" id="draggableHeaderMovement">Movement</div>
+    <div class="menu-content">
+        <ul>
+            <li>AirJump</li>
+            <li>BugUp</li>
+            <li>Fly</li>
+            <li>Glide</li>
+            <li>HighJump</li>
+            <li>InventoryMove</li>
+            <li>LiquidWalk</li>
+            <li>LongJump</li>
+            <li>NoSlow</li>
+            <li>NoWeb</li>
+            <li>Speed</li>
+            <li>Step</li>
+        </ul>
+    </div>
+</div>
+
+<button class="toggle-button" id="toggleButton"></button>
+
+<iframe class="background-iframe" src="https://bloxd.io/" frameborder="0"></iframe>
+
+<script>
+    const draggableHeaderCombat = document.getElementById('draggableHeaderCombat');
+    const draggableMenuCombat = document.getElementById('draggableMenuCombat');
+    const draggableHeaderMovement = document.getElementById('draggableHeaderMovement');
+    const draggableMenuMovement = document.getElementById('draggableMenuMovement');
+    const toggleButton = document.getElementById('toggleButton');
+    let isDragging = false;
+    let startX, startY, startLeft, startTop;
+    let isMenuVisible = true;
+
+    draggableHeaderCombat.addEventListener('mousedown', startDrag);
+    draggableHeaderCombat.addEventListener('touchstart', startDrag);
+    draggableHeaderMovement.addEventListener('mousedown', startDrag);
+    draggableHeaderMovement.addEventListener('touchstart', startDrag);
+
+    function startDrag(e) {
+        e.preventDefault();
+        isDragging = true;
+        const touch = e.touches ? e.touches[0] : e;
+        startX = touch.clientX;
+        startY = touch.clientY;
+        startLeft = e.target.parentElement.offsetLeft;
+        startTop = e.target.parentElement.offsetTop;
+    }
+
+    document.addEventListener('mousemove', moveDrag);
+    document.addEventListener('touchmove', moveDrag);
+
+    function moveDrag(e) {
+        if (!isDragging) return;
+        const touch = e.touches ? e.touches[0] : e;
+        const deltaX = touch.clientX - startX;
+        const deltaY = touch.clientY - startY;
+        e.target.parentElement.style.left = `${startLeft + deltaX}px`;
+        e.target.parentElement.style.top = `${startTop + deltaY}px`;
+    }
+
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+
+    function endDrag() {
+        isDragging = false;
+    }
+
+    toggleButton.addEventListener('click', toggleMenu);
+
+    function toggleMenu() {
+        if (isMenuVisible) {
+            draggableMenuCombat.style.opacity = '0';
+            draggableMenuCombat.style.transform = 'translate(-50%, -50%) scale(0.5)';
+            draggableMenuCombat.style.pointerEvents = 'none';
+
+            draggableMenuMovement.style.opacity = '0';
+            draggableMenuMovement.style.transform = 'translate(-50%, -50%) scale(0.5)';
+            draggableMenuMovement.style.pointerEvents = 'none';
+
+            toggleButton.style.transform = 'rotate(45deg)';
+        } else {
+            draggableMenuCombat.style.opacity = '1';
+            draggableMenuCombat.style.transform = 'translate(-50%, -50%) scale(1)';
+            draggableMenuCombat.style.pointerEvents = 'auto';
+
+            draggableMenuMovement.style.opacity = '1';
+            draggableMenuMovement.style.transform = 'translate(-50%, -50%) scale(1)';
+            draggableMenuMovement.style.pointerEvents = 'auto';
+
+            toggleButton.style.transform = 'rotate(0deg)';
+        }
+        isMenuVisible = !isMenuVisible;
+    }
+</script>
+
+</body>
+</html>
