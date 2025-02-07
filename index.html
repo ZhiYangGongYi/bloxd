@@ -60,6 +60,7 @@
             padding: 8px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         .menu-content ul li:hover {
             background-color: rgba(255, 255, 255, 0.1);
@@ -145,9 +146,19 @@
     const draggableHeaderMovement = document.getElementById('draggableHeaderMovement');
     const draggableMenuMovement = document.getElementById('draggableMenuMovement');
     const toggleButton = document.getElementById('toggleButton');
+    const backgroundIframe = document.querySelector('.background-iframe');
+
     let isDragging = false;
     let startX, startY, startLeft, startTop;
     let isMenuVisible = true;
+
+    const featureStates = {};
+
+    const menuItems = document.querySelectorAll('.menu-content ul li');
+
+    menuItems.forEach(item => {
+        item.addEventListener('click', () => toggleFeature(item));
+    });
 
     draggableHeaderCombat.addEventListener('mousedown', startDrag);
     draggableHeaderCombat.addEventListener('touchstart', startDrag);
@@ -209,7 +220,21 @@
         }
         isMenuVisible = !isMenuVisible;
     }
-</script>
 
+    function toggleFeature(item) {
+        const featureName = item.textContent;
+        if (featureStates[featureName] === undefined) {
+            featureStates[featureName] = false;
+        }
+
+        featureStates[featureName] = !featureStates[featureName];
+
+        if (featureStates[featureName]) {
+            item.style.color = '#007BFF';
+        } else {
+            item.style.color = 'white';
+        }
+    }
+</script>
 </body>
 </html>
