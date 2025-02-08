@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inject</title>
+    <title>审判公益 For Bloxd | Free User</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -87,6 +87,30 @@
             transition: transform 0.3s ease;
             z-index: 11;
         }
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 10px;
+            color: white;
+            font-size: 14px;
+            max-width: 200px;
+            word-wrap: break-word;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            z-index: 100;
+        }
+        .notification.enabled {
+            background-color: rgba(0, 128, 0, 0.5);
+        }
+        .notification.disabled {
+            background-color: rgba(255, 0, 0, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -140,13 +164,15 @@
 
 <iframe class="background-iframe" src="https://bloxd.io/" frameborder="0"></iframe>
 
+<div id="notificationContainer"></div>
+
 <script>
     const draggableHeaderCombat = document.getElementById('draggableHeaderCombat');
     const draggableMenuCombat = document.getElementById('draggableMenuCombat');
     const draggableHeaderMovement = document.getElementById('draggableHeaderMovement');
     const draggableMenuMovement = document.getElementById('draggableMenuMovement');
     const toggleButton = document.getElementById('toggleButton');
-    const backgroundIframe = document.querySelector('.background-iframe');
+    const notificationContainer = document.getElementById('notificationContainer');
 
     let isDragging = false;
     let startX, startY, startLeft, startTop;
@@ -231,9 +257,39 @@
 
         if (featureStates[featureName]) {
             item.style.color = '#007BFF';
+            showNotification(`Enabled ${featureName}`, 'enabled');
         } else {
             item.style.color = 'white';
+            showNotification(`Disabled ${featureName}`, 'disabled');
         }
+    }
+
+    function showNotification(message, status) {
+        const notification = document.createElement('div');
+        notification.classList.add('notification', status);
+        notification.textContent = message;
+
+        const notifications = document.querySelectorAll('.notification');
+        const offset = notifications.length * 45;
+        notification.style.bottom = `${20 + offset}px`;
+        notification.style.right = '20px';
+
+        notificationContainer.appendChild(notification);
+
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            notification.style.opacity = '1';
+            notification.style.transform = 'translateX(0)';
+        }, 0);
+
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                notificationContainer.removeChild(notification);
+            }, 500);
+        }, 3000);
     }
 </script>
 </body>
