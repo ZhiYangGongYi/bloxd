@@ -77,7 +77,7 @@
         .toggle-button {
             position: absolute;
             top: 10px;
-            right: 10px;
+            left: 10px;
             width: 40px;
             height: 40px;
             background-color: #007BFF;
@@ -87,7 +87,6 @@
             transition: transform 0.3s ease;
             z-index: 11;
         }
-        /* Notification styles */
         .notification {
             position: fixed;
             bottom: 20px;
@@ -109,6 +108,32 @@
             background-color: rgba(0, 128, 0, 0.5);
         }
         .notification.disabled {
+            background-color: rgba(255, 0, 0, 0.5);
+        }
+        .active-features {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+            z-index: 100;
+        }
+        .active-feature {
+            padding: 5px 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+            color: white;
+            font-size: 14px;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 0;
+            transform: translateX(100px);
+        }
+        .active-feature.enabled {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        .active-feature.disabled {
             background-color: rgba(255, 0, 0, 0.5);
         }
     </style>
@@ -165,6 +190,7 @@
 <iframe class="background-iframe" src="https://bloxd.io/" frameborder="0"></iframe>
 
 <div id="notificationContainer"></div>
+<div id="activeFeaturesContainer" class="active-features"></div>
 
 <script>
     const draggableHeaderCombat = document.getElementById('draggableHeaderCombat');
@@ -258,9 +284,11 @@
         if (featureStates[featureName]) {
             item.style.color = '#007BFF';
             showNotification(`Enabled ${featureName}`, 'enabled');
+            showActiveFeature(featureName, 'enabled');
         } else {
             item.style.color = 'white';
             showNotification(`Disabled ${featureName}`, 'disabled');
+            showActiveFeature(featureName, 'disabled');
         }
     }
 
@@ -290,6 +318,62 @@
                 notificationContainer.removeChild(notification);
             }, 500);
         }, 3000);
+    }
+
+    function showActiveFeature(featureName, status) {
+        const activeFeaturesContainer = document.getElementById('activeFeaturesContainer');
+        const existingFeature = document.querySelector(`.active-feature[data-name="${featureName}"]`);
+
+        if (status === 'enabled') {
+            if (!existingFeature) {
+                const activeFeature = document.createElement('div');
+                activeFeature.classList.add('active-feature', 'enabled');
+                activeFeature.textContent = featureName;
+                activeFeature.dataset.name = featureName;
+                activeFeaturesContainer.appendChild(activeFeature);
+
+                sortActiveFeatures();
+                activeFeature.style.opacity = '0';
+                activeFeature.style.transform = 'translateX(100px)';
+                setTimeout(() => {
+                    activeFeature.style.opacity = '1';
+                    activeFeature.style.transform = 'translateX(0)';
+                }, 0);
+            }
+        } else if (existingFeature) {
+            existingFeature.style.opacity = '0';
+            existingFeature.style.transform = 'translateX(100px)';
+            setTimeout(() => {
+                activeFeaturesContainer.removeChild(existingFeature);
+                sortActiveFeatures();
+            }, 300);
+        }
+    }
+
+    function sortActiveFeatures() {
+        const activeFeaturesContainer = document.getElementById('activeFeaturesContainer');
+        const activeFeatures = Array.from(activeFeaturesContainer.children);
+
+        const tempDiv = document.createElement('div');
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.float = 'left';
+        tempDiv.style.whiteSpace = 'nowrap';
+        tempDiv.style.visibility = 'hidden';
+        tempDiv.style.font = '14px Arial';
+        document.body.appendChild(tempDiv);
+
+        activeFeatures.sort((a, b) => {
+            tempDiv.textContent = a.textContent;
+            const widthA = tempDiv.offsetWidth;
+            tempDiv.textContent = b.textContent;
+            const widthB = tempDiv.offsetWidth;
+            return widthB - widthA;
+        });
+
+        document.body.removeChild(tempDiv);
+
+        activeFeaturesContainer.innerHTML = '';
+        activeFeatures.forEach(feature => activeFeaturesContainer.appendChild(feature));
     }
 </script>
 </body>
